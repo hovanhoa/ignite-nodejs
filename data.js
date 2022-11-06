@@ -67,9 +67,9 @@ class SqlExample {
         catch (err) {
             console.log('ERROR: ' + err.message);
         }
-        // finally {
-        //     igniteClient.disconnect();
-        // }
+        finally {
+            igniteClient.disconnect();
+        }
     }
 
     async getConnection() {
