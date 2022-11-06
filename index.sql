@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS City;
+
 CREATE TABLE City (
     ID INT(11),
     Name CHAR(35),
