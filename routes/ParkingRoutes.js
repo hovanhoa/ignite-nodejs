@@ -5,6 +5,10 @@ const OrderService = require('../services/OrderService');
 const ParkingModel = require("../models/ParkingModel.js");
 const router = express.Router();
 
+const IgniteClient = require('apache-ignite-client');
+var conn = require("../Conn.js")
+const COUNTRY_CACHE_NAME = 'Country';
+
 const cors = require("cors")
 router.use(cors())
 
@@ -47,8 +51,21 @@ router.get("/parking-management/:user", async function (req, res) {
 router.get("/parking-searching", async function (req, res) {
     console.log('GET all parking');
     try {
-        const listParking = await ParkingService.getAllParking();
-        res.status(200).send(listParking);
+        const SqlFieldsQuery = IgniteClient.SqlFieldsQuery;
+        const countryCache = conn.getCache(COUNTRY_CACHE_NAME);
+        const query = new SqlFieldsQuery(
+            'SELECT name, population FROM City ORDER BY population DESC LIMIT 10');
+        const cursor = await countryCache.query(query);
+
+        var result = []
+        do {
+            let row = await cursor.getValue();
+            result.push({'name': row[0], 'population': row[1]});
+        } while (cursor.hasMore());
+        res.status(200).send(result);
+
+        // const listParking = await ParkingService.getAllParking();
+        // res.status(200).send(listParking);
     } catch (error) {
         res.status(500).send(error);
     }
