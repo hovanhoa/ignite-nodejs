@@ -11,17 +11,6 @@ const port = process.env.PORT || 8000
 app.use(express.json());
 app.use(cors());
 
-var mongoose = require('mongoose');
-
-var mongoDB = 'mongodb+srv://mhung:123@cluster0.7hgnc.mongodb.net/Easy_Parking';
-mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true});
-
-var db = mongoose.connection;
-
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once("open", function () {
-    console.log("Connected successfully");
-});
 
 app.use('/order', orderRouter);
 app.use("/user", userRouter);

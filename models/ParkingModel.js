@@ -1,78 +1,20 @@
-const mongoose = require("mongoose");
+var conn = require('../Conn')
+const COUNTRY_CACHE_NAME = 'Country';
+const IgniteClient = require('apache-ignite-client');
 
-const ParkingSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        require: true
-    },
+const SqlFieldsQuery = IgniteClient.SqlFieldsQuery;
+const countryCache = conn.getCache(COUNTRY_CACHE_NAME);
 
-    street: {
-        type: String,
-        required: true
-    },
-
-    ward: {
-        type: String,
-        required: true
-    },
-
-    district: {
-        type: String,
-        required: true
-    },
-
-    province: {
-        type: String,
-        required: true
-    },
-
-    long: {
-        type: Number,
-        default: 0
-    },
-
-    lat: {
-        type: Number,
-        default: 0
-    },
-
-    description: {
-        type: String,
-    },
-
-    img: [String],
+exports.getAll = async function () {
+    const cursor =  await countryCache.query(new SqlFieldsQuery(
+        'SELECT * FROM City'
+    ));
     
-    price: {
-        type: [Number],
-        required: true
-    },
-
-    userName: {
-        type: String,
-        required: true
-    },
-
-    feedback: [{
-        userName: {
-            type: String,
-            required: true
-        },
-        
-        content: {
-            type: String
-        },
-        time: {
-            type: Date,
-            required: true
-        },
-        rate: {
-            type: Number,
-            required: true
-        }
-    }
-    ]
-});
-
-const ParkingModel = mongoose.model("parkings", ParkingSchema);
-
-module.exports = ParkingModel;
+    var result = []
+    do {
+        let row = await cursor.getValue();
+        console.log(row)
+        result.push({'name': row[0], 'population': row[1]});
+    } while (cursor.hasMore());
+    return result;
+};
